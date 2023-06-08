@@ -1,7 +1,9 @@
 import pandas as pd
 import requests
+import cv2
 import os 
 import time
+import numpy as np
 
 def download_images(df, batch_size, delay):
     """
@@ -32,11 +34,16 @@ def download_images(df, batch_size, delay):
 
         # Check if the request is successful
         if response.status_code == 200:
-            # Open a file in write mode
+            # Convert bytes to numpy array
+            nparr = np.frombuffer(response.content, np.uint8)
+            # Decode numpy array into image
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            # Resize image to 256x256
+            img = cv2.resize(img, (256, 256))
+            
             # Save the image under the "images" directory and name it with the id
-            with open(file_path, "wb") as f:
-                # Write the contents of the response (the image) to the file
-                f.write(response.content)
+            cv2.imwrite(file_path, img)
 
         # If we"ve reached the batch limit, sleep for a while
         if (idx + 1) % batch_size == 0:
@@ -44,9 +51,8 @@ def download_images(df, batch_size, delay):
 
 def main():
     
-    df = pd.read_csv("posts.csv", index_col=0)
+    df = pd.read_csv("data/posts.csv")
     download_images(df=df, batch_size=10, delay=10)
     
 if __name__ == "__main__":
     main()
-
