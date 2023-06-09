@@ -33,7 +33,7 @@ def process_data(df: pd.DataFrame) -> pd.DataFrame:
     new_columns = {"id": "id","commentsCount": "n_comments","likesCount": "n_likes","latestComments": "comments","images": "image"}
     df = df.rename(columns=new_columns)
     
-    # Filtering out rows where type is 'Video', likes count is -1.0 and image is not null
+    # Filtering out rows where type is "Video", likes count is -1.0 and image is not null
     df = df[(df["type"] != "Video")] 
     df = df[df["n_likes"] != -1.0]
     df = df[df["image"].notna()]

@@ -32,7 +32,7 @@ def get_device():
     Returns:
         device (torch.device): Current device.
     """
-    return torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def get_image_paths(image_dir):
@@ -116,7 +116,7 @@ def main():
     MODEL_TYPE = "vit_h"
     CHECKPOINT_PATH = os.path.join(os.getcwd(), "models", "sam_weights.pth")
     YOLO_WEIGHTS = "models/yolo_weights.pt"
-    IMAGE_DIR = 'images/original_images'
+    IMAGE_DIR = "images/original_images"
     
     # Make sure the segmented images directory exists
     if not os.path.exists("images/segmented_images"):
