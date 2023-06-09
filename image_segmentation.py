@@ -71,19 +71,14 @@ def segment_image(yolo, mask_predictor, image_path):
                 x, y, w, h = convert_bbox_x1y1x2y2_to_xywh(b[0], b[1], b[2], b[3])
                 r.append([b[0], b[1], b[2], b[3], b[5]])
 
-    names = yolo_output[0].names
-
     # Create the image variable and box_annotator
     image = cv2.imread(image_path)
     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    box_annotator = sv.BoxAnnotator(color=sv.Color.red())
-    mask_annotator = sv.MaskAnnotator(color=sv.Color.red())
 
     mask_combined = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
     output = np.zeros_like(image)
 
     for i, box in enumerate(r):
-        label = box[-1]
         box = box[:-1]
         box = np.array(box)
 
@@ -93,9 +88,6 @@ def segment_image(yolo, mask_predictor, image_path):
 
         detections = sv.Detections(xyxy=sv.mask_to_xyxy(masks=masks), mask=masks)
         detections = detections[detections.area == np.max(detections.area)]
-
-        source_image = box_annotator.annotate(scene=image.copy(), detections=detections, skip_label=True)
-        segmented_image = mask_annotator.annotate(scene=image.copy(), detections=detections)
 
         # Combine the masks with a logical OR operation within the loop
         for m in masks:
