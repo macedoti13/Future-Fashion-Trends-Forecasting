@@ -50,8 +50,8 @@ image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 box_annotator = sv.BoxAnnotator(color=sv.Color.red())
 mask_annotator = sv.MaskAnnotator(color=sv.Color.red())
 
-# Create an empty mask before the loop
 mask_combined = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
+output = np.zeros_like(image)
 
 for i, box in enumerate(r):
     label = box[-1]
@@ -71,9 +71,10 @@ for i, box in enumerate(r):
     # Combine the masks with a logical OR operation within the loop
     for m in masks:
         mask_combined = np.logical_or(mask_combined, m)
+        
+# Use the combined mask to select the pixels of the original image
+output[mask_combined] = image[mask_combined]
 
-# Convert the combined mask to uint8 and save it after the loop
-mask_combined = mask_combined.astype(np.uint8) * 255
-img_to_save = mask_combined
-save_path = f"segmented_images/outfit_{os.path.basename(IMAGE_PATH)}"
-cv2.imwrite(save_path, img_to_save)
+# Save the image with the original colors
+save_path = f"segmented_images/outfit_{os.path.basename(IMAGE_PATH).replace('.jpg', '.png')}"
+cv2.imwrite(save_path, cv2.cvtColor(output, cv2.COLOR_RGB2BGR))  # Convert back to BGR for saving
