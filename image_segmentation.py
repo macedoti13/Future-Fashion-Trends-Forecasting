@@ -6,6 +6,10 @@ import supervision as sv
 import os
 import torch
 
+# make sure the images directory exists
+if not os.path.exists("segmented_images"):
+    os.makedirs("segmented_images")
+
 HOME = os.getcwd()
 DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 MODEL_TYPE = "vit_h"
@@ -40,34 +44,36 @@ for result in yolo_output:
 
 names = yolo_output[0].names
 
+# Create the image variable and box_annotator
+image = cv2.imread(IMAGE_PATH)
+image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+box_annotator = sv.BoxAnnotator(color=sv.Color.red())
+mask_annotator = sv.MaskAnnotator(color=sv.Color.red())
+
+# Create an empty mask before the loop
+mask_combined = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
+
 for i, box in enumerate(r):
     label = box[-1]
     box = box[:-1]
     box = np.array(box)
-    
-    image = cv2.imread(IMAGE_PATH)
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
+
     mask_predictor.set_image(image)
     
     masks, scores, logits = mask_predictor.predict(box=box, multimask_output=True)
-    
-    box_annotator = sv.BoxAnnotator(color=sv.Color.red())
-    mask_annotator = sv.MaskAnnotator(color=sv.Color.red())
-    
-    detections = sv.Detections(xyxy=sv.mask_to_xyxy(masks=masks),mask=masks)
+
+    detections = sv.Detections(xyxy=sv.mask_to_xyxy(masks=masks), mask=masks)
     detections = detections[detections.area == np.max(detections.area)]
 
     source_image = box_annotator.annotate(scene=image.copy(), detections=detections, skip_label=True)
     segmented_image = mask_annotator.annotate(scene=image.copy(), detections=detections)
-    
-    #take the 3 masks and combine them with an OR operation
-    mask = np.zeros((256, 256), dtype=np.uint8)
-    for m in masks:
-        mask = np.logical_or(mask, m)
-    mask = mask.astype(np.uint8) * 255
 
-    img_to_save = mask
-    s = IMAGE_PATH.replace(".jpg", "").replace("images/", "")
-    save_path = f"segmented_images/{names[label]}_{s}.png"
-    cv2.imwrite(save_path, img_to_save)
+    # Combine the masks with a logical OR operation within the loop
+    for m in masks:
+        mask_combined = np.logical_or(mask_combined, m)
+
+# Convert the combined mask to uint8 and save it after the loop
+mask_combined = mask_combined.astype(np.uint8) * 255
+img_to_save = mask_combined
+save_path = f"segmented_images/outfit_{os.path.basename(IMAGE_PATH)}"
+cv2.imwrite(save_path, img_to_save)
