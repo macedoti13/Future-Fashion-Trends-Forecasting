@@ -7,14 +7,14 @@ import os
 import torch
 
 # make sure the images directory exists
-if not os.path.exists("segmented_images"):
-    os.makedirs("segmented_images")
+if not os.path.exists("images/segmented_images"):
+    os.makedirs("images/segmented_images")
 
 HOME = os.getcwd()
 DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 MODEL_TYPE = "vit_h"
 CHECKPOINT_PATH = os.path.join(HOME, "models", "sam_weights.pth")
-IMAGE_PATH = 'images/1.jpg'
+IMAGE_PATH = 'images/original_images/1.jpg'
 
 # creates YOLO model
 yolo = YOLO("models/yolo_weights.pt")
@@ -76,5 +76,5 @@ for i, box in enumerate(r):
 output[mask_combined] = image[mask_combined]
 
 # Save the image with the original colors
-save_path = f"segmented_images/outfit_{os.path.basename(IMAGE_PATH).replace('.jpg', '.png')}"
+save_path = f"images/segmented_images/outfit_{os.path.basename(IMAGE_PATH).replace('.jpg', '.png')}"
 cv2.imwrite(save_path, cv2.cvtColor(output, cv2.COLOR_RGB2BGR))  # Convert back to BGR for saving

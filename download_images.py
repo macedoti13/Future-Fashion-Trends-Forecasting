@@ -16,14 +16,14 @@ def download_images(df, batch_size, delay):
 
     """
     # make sure the images directory exists
-    if not os.path.exists("images"):
-        os.makedirs("images")
+    if not os.path.exists("images/original_images"):
+        os.makedirs("images/original_images")
 
     # Iterate over the DataFrame rows with batch control
     for idx, row in df.iterrows():
         image_url = row["image"]
         id = row["id"]
-        file_path = f"images/{id}.jpg"
+        file_path = f"images/original_images/{id}.jpg"
 
         # Check if the file already exists
         if os.path.exists(file_path):
@@ -44,10 +44,15 @@ def download_images(df, batch_size, delay):
             
             # Save the image under the "images" directory and name it with the id
             cv2.imwrite(file_path, img)
+            
+            # print download checkpoint
+            print(f"downloaded image {id}")
 
         # If we"ve reached the batch limit, sleep for a while
         if (idx + 1) % batch_size == 0:
             time.sleep(delay)
+            
+        break
 
 def main():
     
