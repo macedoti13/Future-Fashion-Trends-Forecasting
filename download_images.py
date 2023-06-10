@@ -29,30 +29,34 @@ def download_images(df, batch_size, delay):
         if os.path.exists(file_path):
             continue
 
-        # Send a HTTP request to the URL of the image
-        response = requests.get(image_url)
+        # Try to request and save image, skip to the next one if there is an issue
+        try:
+            # Send a HTTP request to the URL of the image
+            response = requests.get(image_url)
 
-        # Check if the request is successful
-        if response.status_code == 200:
-            # Convert bytes to numpy array
-            nparr = np.frombuffer(response.content, np.uint8)
-            # Decode numpy array into image
-            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            
-            # Resize image to 256x256
-            img = cv2.resize(img, (256, 256))
-            
-            # Save the image under the "images" directory and name it with the id
-            cv2.imwrite(file_path, img)
-            
-            # print download checkpoint
-            print(f"downloaded image {id}")
+            # Check if the request is successful
+            if response.status_code == 200:
+                # Convert bytes to numpy array
+                nparr = np.frombuffer(response.content, np.uint8)
+                # Decode numpy array into image
+                img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+                
+                # Resize image to 256x256
+                img = cv2.resize(img, (256, 256))
+                
+                # Save the image under the "images" directory and name it with the id
+                cv2.imwrite(file_path, img)
+                
+                # print download checkpoint
+                print(f"downloaded image {id}")
 
-        # If we"ve reached the batch limit, sleep for a while
-        if (idx + 1) % batch_size == 0:
-            time.sleep(delay)
+            # If we've reached the batch limit, sleep for a while
+            if (idx + 1) % batch_size == 0:
+                time.sleep(delay)
+        
+        except Exception as e:
+            print(f"Error for image {id}: {str(e)}")
             
-        break
 
 def main():
     
