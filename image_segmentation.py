@@ -122,8 +122,18 @@ def main():
     # Segment all images in the directory
     image_paths = get_image_paths(IMAGE_DIR)
     for image_path in image_paths:
+        # Define the path of the segmented image
+        segmented_image_path = f"images/segmented_images/outfit_{os.path.basename(image_path).replace('.jpg', '.png')}"
+        
+        # Check if the segmented image already exists
+        if os.path.exists(segmented_image_path):
+            print(f"Segmented image {segmented_image_path} already exists, skipping.")
+            continue
+
+        # If it doesn't exist, perform the segmentation
         segment_image(yolo, mask_predictor, image_path)
 
 
 if __name__ == "__main__":
     main()
+
