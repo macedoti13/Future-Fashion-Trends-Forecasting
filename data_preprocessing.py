@@ -74,7 +74,7 @@ def save_data(df: pd.DataFrame, df_comments: pd.DataFrame) -> None:
     
     
 def main():
-    path = "data/posts.json"
+    path = "data/posts_1.json"
     
     # Read, process and save the data
     df = read_data(path)
