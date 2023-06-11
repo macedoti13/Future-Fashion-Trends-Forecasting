@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import cv2 
 import os 
+import re
 
 
 def get_images_and_filenames(path):
@@ -25,6 +26,9 @@ def get_images_and_filenames(path):
             img = img / 255.0
             image_list.append(img)
             filename_list.append(filename)
+            
+    filename_list = [int(re.findall(r'\d+', s)[0]) for s in filename_list]
+
 
     X_train = np.array(image_list, dtype=np.float32)
     
