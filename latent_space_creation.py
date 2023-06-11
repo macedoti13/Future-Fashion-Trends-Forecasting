@@ -1,4 +1,6 @@
 from tensorflow.keras.models import Model, load_model
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 import pandas as pd
 import numpy as np
 import cv2 
@@ -64,8 +66,15 @@ def main():
         latent_spaces.append(flattened_latent_space)
 
     latent_spaces = np.array(latent_spaces)
+    
+    scaler = StandardScaler()
+    latent_spaces_normalized = scaler.fit_transform(latent_spaces)
+    
+    # PCA transformation
+    pca = PCA(n_components=180) 
+    latent_spaces_pca = pca.fit_transform(latent_spaces)
 
-    df = pd.DataFrame({'path':file_names, 'latent_space': list(latent_spaces)})
+    df = pd.DataFrame({'path':file_names, 'latent_space': list(latent_spaces_pca)})
     df.to_hdf('data/latent_spaces.h5', key='df_items', mode='w')
 
 if __name__ == "__main__":
