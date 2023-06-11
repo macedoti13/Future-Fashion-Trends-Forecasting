@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import emot
 
 def read_data(path: str) -> pd.DataFrame:
     """
@@ -14,6 +15,32 @@ def read_data(path: str) -> pd.DataFrame:
     df = pd.read_json(path)
     
     return df 
+
+
+def replace_emojis_with_text(text: str) -> str:
+    """
+    This function replaces any emojis in a given text with their respective textual descriptions.
+
+    Args:
+        text (str): Input text which may contain emojis.
+
+    Returns:
+        str: Output text with emojis replaced by their textual descriptions.
+
+    """
+    emot_obj = emot.emot()
+    
+    try:
+        emoji_info = emot_obj.emoji(text)
+        num_emojis = len(emoji_info["value"])
+        
+        for i in range(num_emojis):
+            text = text.replace(emoji_info["value"][i], emoji_info["mean"][i])
+            
+    except Exception as e:
+        print(f"An error occurred while processing the text: {text}. The error is as follows: {e}")
+    
+    return text
 
 
 def process_data(df: pd.DataFrame) -> pd.DataFrame:
@@ -54,6 +81,9 @@ def process_data(df: pd.DataFrame) -> pd.DataFrame:
     # Converting empty lists in comments to np.nan and creating a separate dataframe for comments
     df["comments"] = df["comments"].apply(lambda x: x if isinstance(x, list) and x else np.nan)
     df_comments = df.explode("comments")[["id", "comments"]]
+    
+    # Replace emojis in comments with their text descriptions
+    df_comments["comments"] = df_comments["comments"].apply(replace_emojis_with_text)
     
     # Removing comments column from the original dataframe
     df = df.drop("comments", axis=1)
