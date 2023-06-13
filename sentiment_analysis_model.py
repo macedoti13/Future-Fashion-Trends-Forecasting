@@ -131,22 +131,11 @@ def save_model(model, filename):
     joblib.dump(model, filename)
 
 
-def predict_unlabelled_data(model, df):
-    """Apply model to predict the category of unlabelled comments.
-
-    Args:
-        model (obj): The trained machine learning model.
-        df (pd.DataFrame): Data containing unlabelled comments.
-        
-    Returns:
-        pd.DataFrame: The data with newly labelled comments.
-    """
-    unlabelled_df = df[df['category'].isnull()]
-    unlabelled_df = unlabelled_df.dropna(subset=['comments']) 
-    unlabelled_comments = unlabelled_df.comments
-    unlabelled_comments = unlabelled_comments.dropna() 
-    unlabelled_df['category'] = model.predict(unlabelled_comments)
-    return unlabelled_df
+def predict_unlabelled_data(model):
+    df_comments = pd.read_csv('../data/posts_comments.csv')
+    df_comments['comments'] = df_comments['comments'].fillna('unknown')
+    df_comments['category'] = model.predict(df_comments['comments'])
+    df_comments.to_csv('data/posts_comments.csv', sep=';')
 
 
 def main():
@@ -157,8 +146,7 @@ def main():
     model.fit(X_train, y_train)
     evaluate_model(model, X_test, y_test)
     save_model(model, 'models/sentiment_analysis_model.joblib')
-    unlabelled_df = predict_unlabelled_data(model, df)
-    unlabelled_df.to_excel('data/labelled_comments.xlsx', index=False)
+    predict_unlabelled_data(model)
 
 
 if __name__ == "__main__":
