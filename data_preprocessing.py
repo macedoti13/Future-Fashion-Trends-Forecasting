@@ -100,7 +100,7 @@ def save_data(df: pd.DataFrame, df_comments: pd.DataFrame) -> None:
     df_comments (pd.DataFrame): Comments dataframe to be saved.
     """
     df.to_csv("data/posts.csv", index=False)
-    df_comments.to_csv("data/posts_comments.csv", index=False)
+    df_comments.to_csv("data/posts_comments.csv", index=False, sep=';')
     
     
 def main():
